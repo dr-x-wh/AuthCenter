@@ -15,7 +15,13 @@ cp -n .env.example .env
 uv run --locked python -m app.asgi
 ```
 
-从仓库根目录启动。启动时同名进程环境变量优先于 `.env`，修改配置后需要重启。配置监听 `127.0.0.1:8000` 时，可在 `http://127.0.0.1:8000/docs` 查看接口文档。
+从项目根目录执行时，`app.asgi` 读取 `.env`，按 `UVICORN_HOST` 和 `UVICORN_PORT` 启动 Uvicorn。同名进程环境变量优先于 `.env`，修改配置后需要重启。配置监听 `127.0.0.1:8000` 时，可在 `http://127.0.0.1:8000/docs` 查看接口文档。
+
+也可以让 Uvicorn 按标准导入路径加载同一个模块，由 uv 在启动前载入 `.env`。
+
+```bash
+uv run --locked --env-file .env uvicorn app.asgi:app
+```
 
 ## 接口
 
@@ -29,7 +35,7 @@ uv run --locked python -m app.asgi
 
 ```text
 app/
-├── asgi.py          校验配置并按配置启动 Uvicorn
+├── asgi.py          导出 ASGI 应用
 ├── factory.py       创建应用并挂载路由
 ├── lifespan.py      初始化和释放应用级资源
 ├── api/             HTTP 路由和请求级依赖

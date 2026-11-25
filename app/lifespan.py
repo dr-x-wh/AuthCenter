@@ -10,7 +10,7 @@ from app.extensions import init_postgres, init_redis
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = app.state.settings
-    configure_logging(settings.log_level)
+    configure_logging(settings.log_level.upper())
 
     async with AsyncExitStack() as stack:
         session_factory = await stack.enter_async_context(init_postgres(str(settings.database_url)))
