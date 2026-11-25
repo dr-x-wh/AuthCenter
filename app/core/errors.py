@@ -42,9 +42,4 @@ async def handle_unexpected_error(_request: Request, exc: Exception) -> JSONResp
     return error_response(status.HTTP_500_INTERNAL_SERVER_ERROR, "服务器内部错误")
 
 
-exception_handlers = {
-    BusinessError: handle_business_error,
-    RequestValidationError: handle_validation_error,
-    HTTPException: handle_http_error,
-    Exception: handle_unexpected_error,
-}
+exception_handlers = {BusinessError: handle_business_error, RequestValidationError: handle_validation_error, HTTPException: handle_http_error, Exception: handle_unexpected_error, }

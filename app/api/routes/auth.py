@@ -1,18 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
-from app.core.response import Result
+from app.core.errors import BusinessError
 
 router = APIRouter(tags=["认证"])
 
 
-@router.get(
-    "/login",
-    status_code=status.HTTP_501_NOT_IMPLEMENTED,
-    response_model=Result[None],
-    response_description="认证功能尚未实现",
-)
+@router.get("/login", )
 async def login() -> None:
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="登录功能尚未实现",
-    )
+    raise BusinessError("尚未实现")
