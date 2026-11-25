@@ -6,7 +6,7 @@ from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from .deps import DBSession, RedisClient
+from ..deps import DBSession, RedisClient
 
 router = APIRouter(prefix="/health", tags=["健康检查"])
 READINESS_TIMEOUT = 3

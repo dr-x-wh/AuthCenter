@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.auth import router as auth_router
-from app.api.health import router as health_router
+from app.api.router import router as api_router
 from app.core import Settings
 from app.lifespan import lifespan
 
@@ -13,6 +12,5 @@ def create_app(settings: Settings) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = settings
-    app.include_router(health_router)
-    app.include_router(auth_router)
+    app.include_router(api_router)
     return app
