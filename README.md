@@ -9,21 +9,13 @@ uv sync --locked
 cp -n .env.example .env
 ```
 
-在 `.env` 中填入可用的 PostgreSQL 和 Redis 连接地址，再从仓库根目录启动服务。
+按 `.env.example` 中的说明填写 `.env`。后端运行环境、监听 IP、监听端口和两项连接地址均为必填。数据库与 Redis 地址须包含主机名或 IP。配置缺失或无效时，启动入口会列出对应的变量名并退出。
 
 ```bash
-uv run --locked uvicorn app.asgi:app --reload
+uv run --locked python -m app.asgi
 ```
 
-| 环境变量 | 用途 |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL 连接地址。支持 `postgresql+asyncpg://`、`postgresql://` 和 `postgres://`，也可使用 `POSTGRES_URL` |
-| `REDIS_URL` | Redis 连接地址 |
-| `APP_NAME` | 服务名称，默认 `AuthCenter` |
-| `APP_DEBUG` | FastAPI 调试模式，默认 `false` |
-| `LOG_LEVEL` | 应用日志级别，默认 `INFO` |
-
-启动后可在 `http://127.0.0.1:8000/docs` 查看接口文档。
+从仓库根目录启动。启动时同名进程环境变量优先于 `.env`，修改配置后需要重启。配置监听 `127.0.0.1:8000` 时，可在 `http://127.0.0.1:8000/docs` 查看接口文档。
 
 ## 接口
 
@@ -37,7 +29,7 @@ uv run --locked uvicorn app.asgi:app --reload
 
 ```text
 app/
-├── asgi.py          Uvicorn 入口
+├── asgi.py          校验配置并按配置启动 Uvicorn
 ├── factory.py       创建应用并挂载路由
 ├── lifespan.py      初始化和释放应用级资源
 ├── api/             HTTP 路由和请求级依赖

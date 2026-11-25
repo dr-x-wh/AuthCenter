@@ -13,12 +13,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging(settings.log_level)
 
     async with AsyncExitStack() as stack:
-        session_factory = await stack.enter_async_context(init_postgres(settings.postgres_url))
-        redis = await stack.enter_async_context(init_redis(settings.redis_url))
+        session_factory = await stack.enter_async_context(init_postgres(str(settings.database_url)))
+        redis = await stack.enter_async_context(init_redis(str(settings.redis_url)))
         app.state.session_factory = session_factory
         app.state.redis = redis
 
-        logger.info("Application startup completed")
+        logger.info("Application startup completed, environment=%s", settings.environment)
         try:
             yield
         finally:

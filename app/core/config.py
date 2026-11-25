@@ -1,8 +1,19 @@
-from functools import cache
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import AliasChoices, Field, field_validator
+from pydantic import AnyUrl, Field, IPvAnyAddress, StringConstraints, UrlConstraints, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DatabaseURL = Annotated[
+    AnyUrl,
+    UrlConstraints(
+        allowed_schemes=["postgresql+asyncpg", "postgresql", "postgres"],
+        host_required=True,
+    ),
+]
+RedisURL = Annotated[
+    AnyUrl,
+    UrlConstraints(allowed_schemes=["redis", "rediss"], host_required=True),
+]
 
 
 class Settings(BaseSettings):
@@ -13,20 +24,17 @@ class Settings(BaseSettings):
         hide_input_in_errors=True,
     )
 
-    app_name: str = "AuthCenter"
-    app_debug: bool = False
+    environment: Literal["development", "production"] = Field(validation_alias="BACKEND_ENV")
+    host: IPvAnyAddress = Field(validation_alias="BACKEND_HOST")
+    port: int = Field(ge=1, le=65535, validation_alias="BACKEND_PORT")
 
+    database_url: DatabaseURL = Field(validation_alias="DATABASE_URL")
+    redis_url: RedisURL = Field(validation_alias="REDIS_URL")
+
+    app_name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = "AuthCenter"
     log_level: Literal["ERROR", "WARNING", "INFO", "DEBUG"] = "INFO"
-
-    postgres_url: str = Field(validation_alias=AliasChoices("postgres_url", "database_url"))
-    redis_url: str
 
     @field_validator("log_level", mode="before")
     @classmethod
     def normalize_log_level(cls, value: object) -> object:
         return value.strip().upper() if isinstance(value, str) else value
-
-
-@cache
-def get_settings() -> Settings:
-    return Settings()
