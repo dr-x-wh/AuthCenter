@@ -9,21 +9,22 @@ uv sync --locked
 cp -n .env.example .env
 ```
 
-按 `.env.example` 中的说明填写 `.env`。后端运行环境、监听 IP、监听端口和两项连接地址均为必填。数据库与 Redis 地址须指定主机名或 IP。缺少必填项时会指出变量名并退出，连接参数由对应客户端处理。
+按 `.env.example` 中的说明填写 `.env`。后端运行环境、日志级别和两项连接地址均为必填。PostgreSQL 地址使用 `postgresql+asyncpg://`，连接参数按 SQLAlchemy 的 asyncpg 方言支持的格式填写。应用将 PostgreSQL 和 Redis 连接地址原样传给各自的客户端。缺少必填项时会指出变量名并退出。
 
 ```bash
-uv run --locked python -m app.asgi
+uv run --env-file .env uvicorn app.asgi:app
 ```
 
-从项目根目录执行时，`app.asgi` 读取 `.env`，按 `UVICORN_HOST` 和 `UVICORN_PORT` 启动 Uvicorn。同名进程环境变量优先于 `.env`，修改配置后需要重启。
+从项目根目录启动时，uv 会在启动 Uvicorn 前加载 `.env`。监听地址和端口使用 Uvicorn 的环境变量，以下是默认值。[Uvicorn 配置文档](https://uvicorn.dev/settings/)
 
-`BACKEND_ENV=development` 时开放 `/docs`、`/redoc` 和 `/openapi.json`，并允许使用 `debug` 日志级别。生产环境的 `UVICORN_LOG_LEVEL` 接受 `info`、`warning` 和 `error`。异常堆栈由服务端记录。
-
-也可以让 Uvicorn 按标准导入路径加载同一个模块，由 uv 在启动前载入 `.env`。
-
-```bash
-uv run --locked --env-file .env uvicorn app.asgi:app
+```dotenv
+UVICORN_HOST=127.0.0.1
+UVICORN_PORT=8000
 ```
+
+同名进程环境变量优先于 `.env`，修改配置后需要重启。
+
+`LOG_LEVEL` 使用大写值 `ERROR`、`WARNING`、`INFO` 或 `DEBUG`。仅 `ENV=development` 允许使用 `DEBUG`。异常堆栈由服务端记录。
 
 ## 接口
 

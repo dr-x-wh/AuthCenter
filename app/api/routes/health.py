@@ -7,6 +7,8 @@ from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.core.logging import logger
+
 from ..deps import DBSession, RedisClient
 
 router = APIRouter(prefix="/health", tags=["健康检查"])
@@ -30,9 +32,10 @@ async def ready(db: DBSession, redis: RedisClient) -> JSONResponse:
             await db.execute(text("SELECT 1"))
             server_ready = await redis.ping()
     except (OSError, InterfaceError, PostgresError, RedisError, SQLAlchemyError):
+        logger.warning("就绪检查失败", exc_info=True)
         server_ready = False
 
     if server_ready:
         return JSONResponse(health_up)
 
-    return JSONResponse(content=health_down, status_code=status.HTTP_503_SERVICE_UNAVAILABLE, )
+    return JSONResponse(content=health_down, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)

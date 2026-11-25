@@ -14,11 +14,11 @@ class Result(BaseModel, Generic[T]):
     message: str = DEFAULT_MESSAGE
 
 
-def to_response(data: Any = None, code: int | None = None, message: str | None = None) -> JSONResponse:
-    result = Result[Any](data=data, code=DEFAULT_CODE if code is None else code, message=DEFAULT_MESSAGE if message is None else message)
+def to_response(data: Any = None, code: int = DEFAULT_CODE, message: str = DEFAULT_MESSAGE) -> JSONResponse:
+    result = Result[Any](data=data, code=code, message=message)
     return JSONResponse(result.model_dump(mode="json"))
 
 
-def error_response(status_code: int, message: str, *, data: Any = None, headers: Mapping[str, str] | None = None, ) -> JSONResponse:
+def error_response(status_code: int, message: str, *, data: Any = None, headers: Mapping[str, str] | None = None) -> JSONResponse:
     result = Result(data=data, code=status_code, message=message)
     return JSONResponse(result.model_dump(mode="json"), status_code=status_code, headers=headers)

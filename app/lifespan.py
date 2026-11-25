@@ -11,12 +11,10 @@ from app.extensions import init_postgres, init_redis
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings: Settings = app.state.settings
-    configure_logging(settings.log_level.upper())
+    configure_logging(settings.log_level)
 
     async with (
-        init_postgres(settings.database_url) as session_factory,
-        init_redis(settings.redis_url) as redis,
-    ):
+        init_postgres(settings.database_url) as session_factory, init_redis(settings.redis_url) as redis):
         app.state.session_factory = session_factory
         app.state.redis = redis
 
