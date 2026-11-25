@@ -9,13 +9,15 @@ uv sync --locked
 cp -n .env.example .env
 ```
 
-按 `.env.example` 中的说明填写 `.env`。后端运行环境、监听 IP、监听端口和两项连接地址均为必填。数据库与 Redis 地址须包含主机名或 IP。配置缺失或无效时，启动入口会列出对应的变量名并退出。
+按 `.env.example` 中的说明填写 `.env`。后端运行环境、监听 IP、监听端口和两项连接地址均为必填。数据库与 Redis 地址须指定主机名或 IP。缺少必填项时会指出变量名并退出，连接参数由对应客户端处理。
 
 ```bash
 uv run --locked python -m app.asgi
 ```
 
-从项目根目录执行时，`app.asgi` 读取 `.env`，按 `UVICORN_HOST` 和 `UVICORN_PORT` 启动 Uvicorn。同名进程环境变量优先于 `.env`，修改配置后需要重启。配置监听 `127.0.0.1:8000` 时，可在 `http://127.0.0.1:8000/docs` 查看接口文档。
+从项目根目录执行时，`app.asgi` 读取 `.env`，按 `UVICORN_HOST` 和 `UVICORN_PORT` 启动 Uvicorn。同名进程环境变量优先于 `.env`，修改配置后需要重启。
+
+`BACKEND_ENV=development` 时开放 `/docs`、`/redoc` 和 `/openapi.json`，并允许使用 `debug` 日志级别。生产环境的 `UVICORN_LOG_LEVEL` 接受 `info`、`warning` 和 `error`。异常堆栈由服务端记录。
 
 也可以让 Uvicorn 按标准导入路径加载同一个模块，由 uv 在启动前载入 `.env`。
 
@@ -30,6 +32,10 @@ uv run --locked --env-file .env uvicorn app.asgi:app
 | `GET /health`、`GET /health/live`、`GET /health/startup` | 应用完成启动并响应请求时返回 `200` |
 | `GET /health/ready` | 执行 PostgreSQL `SELECT 1` 和 Redis `PING`，均成功时返回 `200`，依赖不可用或探测超时时返回 `503` |
 | `GET /login` | 认证预留入口，返回 `501` |
+
+API 的成功和错误响应使用统一的 `Result` 结构，包含 `data`、`code` 和 `message`。成功时 `code` 为 `0`，错误时与 HTTP 状态码一致。全局处理器负责封装 HTTP 异常、请求校验失败和未处理异常。接口路径按声明匹配，多余的尾斜杠会触发 `404`。
+
+开发环境的文档页面和 OpenAPI 描述保留各自的标准格式。
 
 ## 工程结构
 

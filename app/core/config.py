@@ -1,25 +1,16 @@
-from typing import Annotated, Literal
+from typing import Literal
 
-from pydantic import AnyUrl, Field, IPvAnyAddress, StringConstraints, UrlConstraints
+from pydantic import Field, IPvAnyAddress, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-DatabaseURL = Annotated[
-    AnyUrl,
-    UrlConstraints(
-        allowed_schemes=["postgresql+asyncpg", "postgresql", "postgres"],
-        host_required=True,
-    ),
-]
-RedisURL = Annotated[
-    AnyUrl,
-    UrlConstraints(allowed_schemes=["redis", "rediss"], host_required=True),
-]
+LogLevel = Literal["error", "warning", "info", "debug"]
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         case_sensitive=True,
         extra="ignore",
+        frozen=True,
         hide_input_in_errors=True,
     )
 
@@ -27,14 +18,14 @@ class Settings(BaseSettings):
     host: IPvAnyAddress = Field(validation_alias="UVICORN_HOST")
     port: int = Field(ge=1, le=65535, validation_alias="UVICORN_PORT")
 
-    database_url: DatabaseURL = Field(validation_alias="DATABASE_URL", repr=False)
-    redis_url: RedisURL = Field(validation_alias="REDIS_URL", repr=False)
+    database_url: str = Field(validation_alias="DATABASE_URL", min_length=1, repr=False)
+    redis_url: str = Field(validation_alias="REDIS_URL", min_length=1, repr=False)
 
-    app_name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = Field(
-        default="AuthCenter",
-        validation_alias="APP_NAME",
-    )
-    log_level: Literal["error", "warning", "info", "debug"] = Field(
-        default="info",
-        validation_alias="UVICORN_LOG_LEVEL",
-    )
+    log_level: LogLevel = Field(default="info", validation_alias="UVICORN_LOG_LEVEL")
+
+    @field_validator("log_level")
+    @classmethod
+    def validate_log_level(cls, level: LogLevel, info: ValidationInfo) -> LogLevel:
+        if level == "debug" and info.data.get("environment") == "production":
+            raise ValueError("debug is only allowed when BACKEND_ENV=development")
+        return level

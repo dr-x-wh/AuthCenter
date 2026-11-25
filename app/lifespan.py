@@ -1,20 +1,22 @@
 from collections.abc import AsyncIterator
-from contextlib import AsyncExitStack, asynccontextmanager
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.core import Settings
 from app.core.logging import configure_logging, logger
 from app.extensions import init_postgres, init_redis
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    settings = app.state.settings
+    settings: Settings = app.state.settings
     configure_logging(settings.log_level.upper())
 
-    async with AsyncExitStack() as stack:
-        session_factory = await stack.enter_async_context(init_postgres(str(settings.database_url)))
-        redis = await stack.enter_async_context(init_redis(str(settings.redis_url)))
+    async with (
+        init_postgres(settings.database_url) as session_factory,
+        init_redis(settings.redis_url) as redis,
+    ):
         app.state.session_factory = session_factory
         app.state.redis = redis
 
