@@ -29,11 +29,11 @@ uv run --locked --env-file .env uvicorn app.asgi:app
 
 | 路径 | 行为 |
 | --- | --- |
-| `GET /health`、`GET /health/live`、`GET /health/startup` | 应用完成启动并响应请求时返回 `200` |
-| `GET /health/ready` | 执行 PostgreSQL `SELECT 1` 和 Redis `PING`，均成功时返回 `200`，依赖不可用或探测超时时返回 `503` |
+| `GET /health`、`GET /health/live`、`GET /health/startup` | 应用完成启动并响应请求时返回 `200` 和 `{"status":"UP"}` |
+| `GET /health/ready` | 执行 PostgreSQL `SELECT 1` 和 Redis `PING`，均成功时返回 `200` 和 `{"status":"UP"}`，依赖不可用或探测超时时返回 `503` 和 `{"status":"DOWN"}` |
 | `GET /login` | 认证预留入口，返回 `501` |
 
-API 的成功和错误响应使用统一的 `Result` 结构，包含 `data`、`code` 和 `message`。成功时 `code` 为 `0`，业务异常 `BusinessError` 返回 HTTP `200` 和 `code: -1`。HTTP 错误响应有响应体时，`code` 与 HTTP 状态码一致。全局处理器负责封装业务异常、HTTP 异常、请求校验失败和未处理异常。接口路径按声明匹配，多余的尾斜杠会触发 `404`。
+业务 API 的成功和错误响应使用统一的 `Result` 结构，包含 `data`、`code` 和 `message`。成功时 `code` 为 `0`，业务异常 `BusinessError` 返回 HTTP `200` 和 `code: -1`。HTTP 错误响应有响应体时，`code` 与 HTTP 状态码一致。全局处理器负责封装业务异常、HTTP 异常、请求校验失败和未处理异常。接口路径按声明匹配，多余的尾斜杠会触发 `404`。
 
 开发环境的文档页面和 OpenAPI 描述保留各自的标准格式。
 
