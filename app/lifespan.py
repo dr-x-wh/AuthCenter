@@ -3,19 +3,21 @@ from contextlib import AsyncExitStack, asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core import get_settings
+from app.core.logging import configure_logging, logger
 from app.extensions import init_postgres, init_redis
-from app.logger import logger
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    settings = get_settings()
+    settings = app.state.settings
+    configure_logging(settings.log_level)
+
     async with AsyncExitStack() as stack:
-        # PostgreSQL
-        app.state.session_factory = (await stack.enter_async_context(init_postgres(settings.postgres_url)))
-        # Redis
-        app.state.redis = (await stack.enter_async_context(init_redis(settings.redis_url)))
+        session_factory = await stack.enter_async_context(init_postgres(settings.postgres_url))
+        redis = await stack.enter_async_context(init_redis(settings.redis_url))
+        app.state.session_factory = session_factory
+        app.state.redis = redis
+
         logger.info("Application startup completed")
         try:
             yield

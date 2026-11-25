@@ -1,42 +1,32 @@
-import random
+from asyncio import timeout
 
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from asyncpg import PostgresError
+from fastapi import APIRouter, Response, status
+from redis.exceptions import RedisError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
-api = APIRouter(prefix="/health", tags=["健康检查"])
+from .deps import DBSession, RedisClient
 
-
-@api.get("")
-async def health() -> JSONResponse:
-    num = random.randint(0, 9)
-    if num != 0:
-        return JSONResponse({"status": "UP"})
-    else:
-        return JSONResponse(content={"status": "DOWN", "message": "Internal component failure"}, status_code=503)
+router = APIRouter(prefix="/health", tags=["健康检查"])
+READINESS_TIMEOUT = 3
 
 
-@api.get("/live")
-async def health() -> JSONResponse:
-    num = random.randint(0, 9)
-    if num != 0:
-        return JSONResponse({"status": "UP"})
-    else:
-        return JSONResponse(content={"status": "DOWN", "message": "Internal component failure"}, status_code=503)
+@router.get("")
+@router.get("/live")
+@router.get("/startup")
+async def live() -> dict[str, str]:
+    return {"status": "UP"}
 
 
-@api.get("/ready")
-async def health() -> JSONResponse:
-    num = random.randint(0, 9)
-    if num != 0:
-        return JSONResponse({"status": "UP"})
-    else:
-        return JSONResponse(content={"status": "DOWN", "message": "Internal component failure"}, status_code=503)
+@router.get("/ready", responses={503: {"description": "依赖服务不可用"}})
+async def ready(db: DBSession, redis: RedisClient, response: Response) -> dict[str, str]:
+    try:
+        async with timeout(READINESS_TIMEOUT):
+            await db.execute(text("SELECT 1"))
+            await redis.ping()
+    except (OSError, PostgresError, RedisError, SQLAlchemyError):
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {"status": "DOWN", "message": "Internal component failure"}
 
-
-@api.get("/startup")
-async def health() -> JSONResponse:
-    num = random.randint(0, 9)
-    if num != 0:
-        return JSONResponse({"status": "UP"})
-    else:
-        return JSONResponse(content={"status": "DOWN", "message": "Internal component failure"}, status_code=503)
+    return {"status": "UP"}
