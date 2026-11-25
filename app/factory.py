@@ -6,8 +6,8 @@ from app.core import Settings
 from app.lifespan import lifespan
 
 
-def create_app(settings: Settings = Settings()) -> FastAPI:
+def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(lifespan=lifespan, exception_handlers=exception_handlers)
-    app.state.settings = settings
+    app.state.settings = settings if settings is not None else Settings()
     app.include_router(api_router)
     return app

@@ -17,7 +17,7 @@ async def init_postgres(url: str) -> AsyncIterator[async_sessionmaker[AsyncSessi
     database_url = make_url(url)
     query = dict(database_url.query)
     if not (database_url.host or query.get("host")):
-        raise ValueError("DATABASE_URL must specify a host")
+        raise ValueError("DATABASE_URL 必须指定主机地址")
     if database_url.drivername in {"postgres", "postgresql"}:
         database_url = database_url.set(drivername="postgresql+asyncpg")
     if "sslmode" in query:
@@ -30,7 +30,7 @@ async def init_postgres(url: str) -> AsyncIterator[async_sessionmaker[AsyncSessi
     if "direct_tls" in query:
         direct_tls = query.pop("direct_tls")
         if direct_tls not in {"true", "false"}:
-            raise ValueError("DATABASE_URL direct_tls must be true or false")
+            raise ValueError("DATABASE_URL 的 direct_tls 参数只能为 true 或 false")
         connect_args["direct_tls"] = direct_tls == "true"
 
     engine = create_async_engine(

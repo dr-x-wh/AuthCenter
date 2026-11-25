@@ -18,9 +18,16 @@ class Settings(BaseSettings):
 
     log_level: LogLevel
 
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def normalize_log_level(cls, level: object) -> object:
+        if isinstance(level, str):
+            return level.upper()
+        return level
+
     @field_validator("log_level")
     @classmethod
     def validate_log_level(cls, level: LogLevel, info: ValidationInfo) -> LogLevel:
-        if level == "debug" and info.data.get("environment") == "production":
-            raise ValueError("debug is only allowed when BACKEND_ENV=development")
-        return level.upper()
+        if level == "DEBUG" and info.data.get("env") == "production":
+            raise ValueError("仅开发环境允许使用 DEBUG 日志级别")
+        return level

@@ -49,6 +49,6 @@ async def ready(db: DBSession, redis: RedisClient) -> Result[HealthUp] | JSONRes
 
     return error_response(
         status.HTTP_503_SERVICE_UNAVAILABLE,
-        "Internal component failure",
+        "依赖服务暂时不可用",
         data=HealthDown(status="DOWN"),
     )

@@ -20,10 +20,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.session_factory = session_factory
         app.state.redis = redis
 
-        logger.info("Application startup completed, environment=%s", settings.environment)
+        environment = "开发环境" if settings.env == "development" else "生产环境"
+        logger.info("应用启动完成，运行环境为%s", environment)
         try:
             yield
         finally:
             del app.state.session_factory
             del app.state.redis
-    logger.info("Application shutdown completed")
+    logger.info("应用已关闭")

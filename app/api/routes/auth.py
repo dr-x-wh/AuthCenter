@@ -14,5 +14,5 @@ router = APIRouter(tags=["认证"])
 async def login() -> None:
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Login is not implemented",
+        detail="登录功能尚未实现",
     )
