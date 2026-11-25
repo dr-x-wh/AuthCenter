@@ -44,6 +44,6 @@ app/
 └── models/          SQLAlchemy 模型基类
 ```
 
-`api/router.py` 在启动时按模块名自动加载 `api/routes/` 下的路由。新增接口时，在该目录或其 Python 子包中新增模块并导出名为 `router` 的 `APIRouter` 即可。`factory.py` 挂载总路由并配置应用生命周期。
+`api/routes/__init__.py` 汇总并导出 `routers` 列表，`api/router.py` 按列表顺序注册路由。`factory.py` 挂载总路由并配置应用生命周期。路由较多时，可由各业务子包汇总自己的列表，再由父包合并。
 
 生命周期通过 `extensions` 管理连接资源，路由通过 `api/deps.py` 注入请求级数据库会话与共享 Redis 客户端。数据库会话在请求结束时关闭，写操作由调用方决定何时提交。

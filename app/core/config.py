@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     host: IPvAnyAddress = Field(validation_alias="UVICORN_HOST")
     port: int = Field(ge=1, le=65535, validation_alias="UVICORN_PORT")
 
-    database_url: DatabaseURL = Field(validation_alias="DATABASE_URL")
-    redis_url: RedisURL = Field(validation_alias="REDIS_URL")
+    database_url: DatabaseURL = Field(validation_alias="DATABASE_URL", repr=False)
+    redis_url: RedisURL = Field(validation_alias="REDIS_URL", repr=False)
 
     app_name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = Field(
         default="AuthCenter",
