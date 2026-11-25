@@ -10,7 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..deps import DBSession, RedisClient
-from ..response import Result, error_response
+from app.core.response import Result, error_response
 
 router = APIRouter(prefix="/health", tags=["健康检查"])
 READINESS_TIMEOUT = 3

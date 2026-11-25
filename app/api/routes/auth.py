@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from ..response import Result
+from app.core.response import Result
 
 router = APIRouter(tags=["认证"])
 
