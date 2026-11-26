@@ -7,7 +7,7 @@ LogLevel = Literal["ERROR", "WARNING", "INFO", "DEBUG"]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", frozen=True)
 
     env: Literal["development", "production"]
     database_url: str
@@ -21,3 +21,6 @@ class Settings(BaseSettings):
         if level == "DEBUG" and info.data.get("env") == "production":
             raise ValueError("仅开发环境允许使用 DEBUG 日志级别")
         return level
+
+
+settings = Settings()

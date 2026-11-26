@@ -9,7 +9,22 @@ from starlette.exceptions import HTTPException
 from .logging import logger
 from .response import error_response, to_response
 
-HTTP_ERROR_MESSAGES = {400: "请求有误", 401: "需要身份认证", 403: "无权访问", 404: "未找到请求的资源", 405: "不支持此请求方法", 409: "请求与资源当前状态冲突", 413: "请求内容过大", 415: "不支持此请求内容类型", 429: "请求过于频繁", 500: "服务器内部错误", 501: "请求的功能尚未实现", 502: "上游服务响应异常", 503: "服务暂时不可用", 504: "等待上游服务响应超时"}
+HTTP_ERROR_MESSAGES = {
+    400: "请求有误",
+    401: "需要身份认证",
+    403: "无权访问",
+    404: "未找到请求的资源",
+    405: "不支持此请求方法",
+    409: "请求与资源当前状态冲突",
+    413: "请求内容过大",
+    415: "不支持此请求内容类型",
+    429: "请求过于频繁",
+    500: "服务器内部错误",
+    501: "请求的功能尚未实现",
+    502: "上游服务响应异常",
+    503: "服务暂时不可用",
+    504: "等待上游服务响应超时",
+}
 
 
 class BusinessError(Exception):
@@ -33,7 +48,9 @@ async def handle_http_error(_request: Request, exc: HTTPException) -> Response:
     return error_response(exc.status_code, message, data=detail, headers=exc.headers)
 
 
-async def handle_validation_error(_request: Request, _exc: RequestValidationError) -> JSONResponse:
+async def handle_validation_error(
+    _request: Request, _exc: RequestValidationError
+) -> JSONResponse:
     return error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, "请求参数校验失败")
 
 
@@ -42,4 +59,9 @@ async def handle_unexpected_error(_request: Request, exc: Exception) -> JSONResp
     return error_response(status.HTTP_500_INTERNAL_SERVER_ERROR, "服务器内部错误")
 
 
-exception_handlers = {BusinessError: handle_business_error, RequestValidationError: handle_validation_error, HTTPException: handle_http_error, Exception: handle_unexpected_error, }
+exception_handlers = {
+    BusinessError: handle_business_error,
+    RequestValidationError: handle_validation_error,
+    HTTPException: handle_http_error,
+    Exception: handle_unexpected_error,
+}

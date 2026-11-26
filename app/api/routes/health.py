@@ -1,3 +1,4 @@
+import logging
 from asyncio import timeout
 
 from asyncpg import InterfaceError, PostgresError
@@ -11,6 +12,7 @@ from app.core.logging import logger
 from ..deps import DBSession, RedisClient
 
 router = APIRouter(prefix="/health", tags=["健康检查"])
+
 READINESS_TIMEOUT = 3
 
 health_up = {"status": "UP"}
@@ -29,12 +31,21 @@ async def ready(db: DBSession, redis: RedisClient) -> JSONResponse:
     try:
         async with timeout(READINESS_TIMEOUT):
             await db.execute(text("SELECT 1"))
-            server_ready = await redis.ping()
-    except (OSError, InterfaceError, PostgresError, RedisError, SQLAlchemyError):
-        logger.warning("就绪检查失败", exc_info=True)
-        server_ready = False
+            is_ready = await redis.ping()
 
-    if server_ready:
+    except TimeoutError:
+        logger.warning("就绪检查超时")
+        is_ready = False
+
+    except (OSError, InterfaceError, PostgresError, RedisError, SQLAlchemyError) as exc:
+        logger.warning(
+            "就绪检查失败：%s", exc, exc_info=logger.isEnabledFor(logging.DEBUG)
+        )
+        is_ready = False
+
+    if is_ready:
         return JSONResponse(health_up)
 
-    return JSONResponse(content=health_down, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return JSONResponse(
+        content=health_down, status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+    )
