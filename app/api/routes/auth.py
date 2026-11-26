@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter
 
 from app.core.errors import BusinessError
 
 router = APIRouter(tags=["认证"])
 
 
-@router.get("/login")
-async def login() -> None:
+@router.get("/text")
+async def text() -> None:
     raise BusinessError("尚未实现")
