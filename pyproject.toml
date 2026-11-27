@@ -23,3 +23,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "CPY001", "COM812", "ANN401", "RUF001", "RUF002", "RUF003"]

@@ -13,7 +13,7 @@ def configure_logging(level: str) -> None:
             fmt="%(levelprefix)s %(asctime)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
             use_colors=True,
-        )
+        ),
     )
 
     logging.basicConfig(

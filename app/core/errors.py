@@ -1,4 +1,4 @@
-from http.client import responses as HTTP_STATUS_DETAILS
+from http.client import responses as http_status_details
 
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
@@ -40,7 +40,7 @@ async def handle_http_error(_request: Request, exc: HTTPException) -> Response:
         return Response(status_code=exc.status_code, headers=exc.headers)
     detail = exc.detail
     message = HTTP_ERROR_MESSAGES.get(exc.status_code, "请求处理失败")
-    if isinstance(detail, str) and detail != HTTP_STATUS_DETAILS.get(exc.status_code, ""):
+    if isinstance(detail, str) and detail != http_status_details.get(exc.status_code, ""):
         message = detail
     return make_response(message=message, status_code=exc.status_code, headers=exc.headers)
 

@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     @classmethod
     def validate_log_level(cls, level: LogLevel, info: ValidationInfo) -> LogLevel:
         if level == "DEBUG" and info.data.get("env") == "production":
-            raise ValueError("仅开发环境允许使用 DEBUG 日志级别")
+            msg = "仅开发环境允许使用 DEBUG 日志级别"
+            raise ValueError(msg)
         return level
 
 

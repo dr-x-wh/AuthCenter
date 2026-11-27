@@ -8,9 +8,8 @@ from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.api.deps import DBSession, RedisClient
 from app.core.logging import logger
-
-from ..deps import DBSession, RedisClient
 
 router = APIRouter(prefix="/health", tags=["健康检查"])
 

@@ -1,10 +1,13 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 
-from app.core.config import Settings
 from app.extensions import init_postgres, init_redis
+
+if TYPE_CHECKING:
+    from app.core.config import Settings
 
 
 @asynccontextmanager

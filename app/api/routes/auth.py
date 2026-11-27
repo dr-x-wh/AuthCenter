@@ -7,4 +7,5 @@ router = APIRouter(tags=["认证"])
 
 @router.get("/text")
 async def text() -> None:
-    raise BusinessError("尚未实现")
+    msg = "尚未实现"
+    raise BusinessError(msg)
