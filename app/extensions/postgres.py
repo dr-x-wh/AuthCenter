@@ -1,6 +1,8 @@
+from asyncio import timeout
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 
@@ -16,6 +18,8 @@ async def init_postgres(
         hide_parameters=True,
     )
     try:
-        yield async_sessionmaker(bind=engine, expire_on_commit=False, autoflush=False)
+        async with timeout(10), engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        yield async_sessionmaker(bind=engine, expire_on_commit=False)
     finally:
         await engine.dispose()

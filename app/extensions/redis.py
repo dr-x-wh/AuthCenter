@@ -1,3 +1,4 @@
+from asyncio import timeout
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -15,4 +16,6 @@ async def init_redis(url: str) -> AsyncGenerator[Redis, None]:
         socket_connect_timeout=5,
         maint_notifications_config=MaintNotificationsConfig(enabled=False),
     ) as client:
+        async with timeout(10):
+            await client.ping()
         yield client
